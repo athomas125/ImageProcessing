@@ -58,6 +58,9 @@ def random_color_augmentation(image):
 
     return image
 
+def convert_to_grayscale(image):
+    return image.convert('L').convert('RGB')
+
 def augment_dataset(input_folder, output_folder, num_augmentations=5, include_grayscale=False):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
