@@ -33,6 +33,7 @@ def parse_args():
     parser.add_argument('input_folder', type=str, help="Path to the input folder containing images.")
     parser.add_argument('output_folder', type=str, help="Path to the output folder to save augmented images.")
     parser.add_argument('--num_augmentations', type=int, default=5, help="Number of augmentations to perform per image.")
+    parser.add_argument('--seed', type=int, default=42, help="seed for random number generator.")
     parser.add_argument('--include_grayscale', action='store_true', help="Include grayscale conversion of images.")
     return parser.parse_args()
 
@@ -61,7 +62,8 @@ def random_color_augmentation(image):
 def convert_to_grayscale(image):
     return image.convert('L').convert('RGB')
 
-def augment_dataset(input_folder, output_folder, num_augmentations=5, include_grayscale=False):
+def augment_dataset(input_folder, output_folder, num_augmentations=5, include_grayscale=False, seed=42):
+    np.random.seed(seed)
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
