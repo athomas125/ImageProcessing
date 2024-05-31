@@ -18,7 +18,7 @@ def process_video(video_path,
                   sample_rate=10,
                   end_time = None,
                   dir='plots',
-                  prefix='YH'
+                  prefix='YH',
                   filename='avg_pixel_change_plot.png',
                   clip_dir='clips'):
     os.makedirs(dir, exist_ok=True)
