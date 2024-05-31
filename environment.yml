@@ -1,9 +1,12 @@
-name: ImageProc
+name: IMG_PROC
 channels:
   - conda-forge
   - defaults
 dependencies:
   - python=3.9
   - pip
-  - numpy
   - pillow
+  - pip:
+    - opencv-python
+    - numpy
+    - matplotlib
