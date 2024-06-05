@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 import math
+import argparse
 
 def calculate_average_pixel_change(frame1, frame2):
     # Calculate the absolute difference between the two frames
@@ -17,10 +18,11 @@ def calculate_average_pixel_change(frame1, frame2):
 def process_video(video_path,
                   sample_rate=10,
                   end_time = None,
-                  dir='plots',
-                  prefix='YH',
+                  dir='plots/',
+                  prefix='YH_',
                   filename='avg_pixel_change_plot.png',
-                  clip_dir='clips'):
+                  clip_dir='clips/'):
+    start = time.time()
     os.makedirs(dir, exist_ok=True)
     # Open the video file
     cap = cv2.VideoCapture(video_path)
@@ -49,20 +51,20 @@ def process_video(video_path,
     frame_count = 0
     while True:
         # Calculate the time for the current frame
-        time = frame_count / fps
+        current_time = frame_count / fps
         # Read the current frame
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame_count)
         ret, current_frame = cap.read()
-        if not ret or time > end_time:
+        if not ret or current_time > end_time:
             break
         
         # Calculate the average pixel change between the current frame and the previous frame
         avg_change = calculate_average_pixel_change(prev_frame, current_frame)
         pixel_changes.append(avg_change)
         
-        # Calculate the time for the current frame
-        time = frame_count / fps
-        times.append(time)
+        # Calculate the current_time for the current frame
+        current_time = frame_count / fps
+        times.append(current_time)
     
         # Update the previous frame
         prev_frame = current_frame
@@ -88,7 +90,7 @@ def process_video(video_path,
     plt.ylabel('Average Pixel Change')
     plt.title('Average Pixel Change vs. Time')
     
-    output_plot = dir + '/' + filename
+    output_plot = dir + prefix + filename
     plt.tight_layout()
     plt.savefig(output_plot)
     
@@ -97,11 +99,11 @@ def process_video(video_path,
     ## OF THE AVERAGE PIXEL CHANGE BETWEEN SECONDS OF VIDEO IN ORDER TO GET   ##
     ## CLIPS THAT INCLUDE A FISH                                              ##
     ############################################################################
-    os.makedirs(clip_dir, exist_ok=True)
+    os.makedirs('clips/'+prefix+clip_dir, exist_ok=True)
     
-    # Convert time to frame number
-    def time_to_frame(time):
-        return int(time * fps)
+    # Convert current_time to frame number
+    def current_time_to_frame(current_time):
+        return int(current_time * fps)
     
     # Identify continuous peak locations
     continuous_segments = []
@@ -129,12 +131,12 @@ def process_video(video_path,
         start_time = times[segment[0]]
         end_time = times[segment[1]]
         
-        start_frame = time_to_frame(start_time)
-        end_frame = time_to_frame(end_time)
+        start_frame = current_time_to_frame(start_time)
+        end_frame = current_time_to_frame(end_time)
         
         cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        out = cv2.VideoWriter(f'{clip_dir}/{prefix}_clip_{math.floor(start_time)}_{math.floor(end_time)}.mp4', fourcc, fps, 
+        out = cv2.VideoWriter(f'clips/{prefix}{clip_dir}{prefix}clip_{math.floor(start_time)}_{math.floor(end_time)}.mp4', fourcc, fps, 
                               (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))
         
         for frame_idx in range(start_frame, end_frame + 1):
@@ -146,9 +148,18 @@ def process_video(video_path,
         out.release()
     
     cap.release()
+    print(time.time() - start)
 
-# Example usage
-video_path = '/mnt/c/Users/attho/Downloads/0015_vid.mp4'
-start = time.time()
-process_video(video_path, sample_rate=150, end_time=None, dir='plots/', prefix='YH_s2_tr1', filename='avg_pix_YH_s2_tr1_bower.png', clip_dir='clips/YH_s2_tr1_bower_clips')
-print(time.time() - start)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Process a video to calculate average pixel changes and extract clips with significant changes.")
+    parser.add_argument("video_path", type=str, help="Path to the input video file ex. /mnt/c/Users/<username>/Downloads/<clip_name>.mp4")
+    parser.add_argument("-s", "--sample_rate", type=int, default=150, help="Frame sampling rate (default: 150 (every 5 seconds @ 30fps))")
+    parser.add_argument("-e","--end_time", type=float, default=None, help="End time in seconds (default: None - end of video)")
+    parser.add_argument("-d","--dir", type=str, default="plots/", help="Directory to save plots (default: 'plots/')")
+    parser.add_argument("-p","--prefix", type=str, default="YH_", help="Prefix for clip filenames (make sure to add trailing '_' for readability) (default: 'YH_', ex. 'YH_s1_tr1_')")
+    parser.add_argument("-f","--filename", type=str, default="avg_pixel_change_plot.png", help="Filename for the plot (default: 'avg_pixel_change_plot.png')")
+    parser.add_argument("-c","--clip_dir", type=str, default="clips/", help="Directory to save video clips (default: ''clips/')")
+
+    args = parser.parse_args()
+    
+    process_video(args.video_path, args.sample_rate, args.end_time, args.dir, args.prefix, args.filename, args.clip_dir)
