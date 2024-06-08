@@ -59,6 +59,7 @@ def process_directory(directory_path):
     videos_path = os.path.join(ROOT_DIRECTORY, directory_path, 'Videos')
     files = list_files(videos_path)
 
+    n_clips = 0
     for file_metadata in files:
         # 10+ hour video in milliseconds
         if file_metadata.get('Size', 0) > VIDEO_THRESHOLD_SIZE:
@@ -68,13 +69,14 @@ def process_directory(directory_path):
 
             if download_file(file_path, DOWNLOAD_FOLDER):
                 prefix = file_path
-                process_video(local_file_path,
+                n_clips += process_video(local_file_path,
                               sample_rate=150,
                               end_time=None,
                               dir='/home/athomas314/gatech/cs8903_research/plots/',
                               prefix=os.path.basename(directory_path)[:10])
                 delete_file(local_file_path)
-                break  # Process only one video per directory
+                if n_clips > 5:
+                    break  # Process until you have five clips per directory
 
 
 def main():

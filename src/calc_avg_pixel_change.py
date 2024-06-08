@@ -109,7 +109,7 @@ def process_video(video_path,
     continuous_segments = []
     start_idx = None
     threshold = np.mean(pixel_changes) + np.std(pixel_changes)
-    
+    n_clips = 0
     for i, change in enumerate(pixel_changes):
         if change > threshold:
             if start_idx is None:
@@ -119,6 +119,7 @@ def process_video(video_path,
                 end_idx = i - 1
                 if end_idx > start_idx + 4:
                     continuous_segments.append((start_idx, end_idx))
+                    n_clips += 1
                 start_idx = None
     
     # If the last segment goes to the end of the list
@@ -149,6 +150,7 @@ def process_video(video_path,
     
     cap.release()
     print(time.time() - start)
+    return n_clips
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process a video to calculate average pixel changes and extract clips with significant changes.")
