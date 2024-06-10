@@ -15,8 +15,11 @@ and then deletes the local copies. Files listed in SKIP_FOLDERS are not download
 DROPBOX_REMOTE = 'CichlidPiData'  # Name of the rclone remote
 # Path to your YH_Build directory in Dropbox
 ROOT_DIRECTORY = '/BioSci-McGrath/Apps/CichlidPiData/__ProjectData/YH_Build'
-DOWNLOAD_FOLDER = '/mnt/c/Users/attho/Downloads/'
-VIDEO_THRESHOLD_SIZE = 10 * 60 * 60 * 1000  # 10 hours in milliseconds
+PLOT_DIR = '/storage/home/hcoda1/0/athomas314/ondemand/CichlidBowerTracking/ImageProcessing'
+CLIP_DIR = '/storage/home/hcoda1/0/athomas314/scratch/clips/'
+DOWNLOAD_FOLDER = '/storage/home/hcoda1/0/athomas314/scratch/vids/'
+VIDEO_THRESHOLD_SIZE = 30000000000  # ~10 hours in Bytes
+JUST_FOLDERS = ['YH_s1_tr1_BowerBuilding']
 SKIP_FOLDERS = ['YH_s1_tr1_BowerBuilding', 'YH_s1_tr2_BowerBuilding',
                 'YH_s2_tr1_BowerBuilding', 'YH_s2_tr2_BowerBuilding']  # List of folders to skip
 
@@ -66,17 +69,34 @@ def process_directory(directory_path):
             file_path = os.path.join(videos_path, file_metadata['Path'])
             local_file_path = os.path.join(
                 DOWNLOAD_FOLDER, os.path.basename(file_path))
-
+            video_name = local_file_path.split('/')[-1].split('.')[0]
+            skip = False
+            for clip in os.listdir(CLIP_DIR + os.path.basename(directory_path)[:10]):
+                if video_name in clip:
+                    skip = True
+                    print(f'skipping downloading {file_path}')
+                    break
+            if skip:
+                continue
+            
+            print(f'downloading {file_path}')
+            start = time.time()
             if download_file(file_path, DOWNLOAD_FOLDER):
+                print(f"downloaded in {time.time() - start}")
                 prefix = file_path
                 n_clips += process_video(local_file_path,
                               sample_rate=150,
                               end_time=None,
-                              dir='/home/athomas314/gatech/cs8903_research/plots/',
-                              prefix=os.path.basename(directory_path)[:10])
+                              dir=PLOT_DIR,
+                              prefix=os.path.basename(directory_path)[:10],
+                              clip_dir=CLIP_DIR,
+                              threshold_devs=1)
                 delete_file(local_file_path)
-                if n_clips > 5:
-                    break  # Process until you have five clips per directory
+                # if n_clips > 5:
+                #     break  # Process until you have five clips per directory
+            else:
+                print(f"failed to download, took {time.time() - start}")
+    print(f'{n_clips} extracted from {videos_path}')
 
 
 def main():
@@ -87,12 +107,16 @@ def main():
         subdirectory_path = subdirectory['Path']
         folder_name = os.path.basename(subdirectory_path)
 
-        if folder_name in SKIP_FOLDERS:
+        if JUST_FOLDERS is not None:
+            if folder_name in JUST_FOLDERS:
+                print(f'Processing subdirectory: {subdirectory_path}')
+                process_directory(subdirectory_path)
+        elif folder_name in SKIP_FOLDERS:
             print(f'Skipping folder: {subdirectory_path}')
             continue
-
-        print(f'Processing subdirectory: {subdirectory_path}')
-        process_directory(subdirectory_path)
+        else:
+            print(f'Processing subdirectory: {subdirectory_path}')
+            process_directory(subdirectory_path)
 
 
 if __name__ == "__main__":
