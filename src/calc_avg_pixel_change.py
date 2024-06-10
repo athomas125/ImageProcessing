@@ -112,6 +112,7 @@ def process_video(video_path,
     start_idx = None
     threshold = np.mean(pixel_changes) + threshold_devs * np.std(pixel_changes)
     n_clips = 0
+    total_extracted_time = 0
     for i, change in enumerate(pixel_changes):
         if change > threshold:
             if start_idx is None:
@@ -122,11 +123,13 @@ def process_video(video_path,
                 if end_idx > start_idx + 4:
                     continuous_segments.append((start_idx, end_idx))
                     n_clips += 1
+                    total_extracted_time += times[end_idx] - times[start_idx]
                 start_idx = None
     
     # If the last segment goes to the end of the list
     if start_idx is not None:
         continuous_segments.append((start_idx, len(pixel_changes) - 1))
+        total_extracted_time += times[len(pixel_changes) - 1] - times[start_idx]
     
     # Clip the video around each continuous segment
     cap = cv2.VideoCapture(video_path)
@@ -152,6 +155,7 @@ def process_video(video_path,
     
     cap.release()
     print(time.time() - start)
+    print(f"Total extracted video time: {total_extracted_time / 60:.2f} minutes")
     return n_clips
 
 if __name__ == "__main__":

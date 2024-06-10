@@ -31,7 +31,7 @@ and then deletes the local copies. Files listed in SKIP_FOLDERS are not download
 Usage:
 
 	1. Update Global Variables at top of file, see docstring for variable descriptions
-	2. run the script
+	2. python pull_and_process.py
 	3. now you have processed your videos
 	4. ???
 	5. Profit
