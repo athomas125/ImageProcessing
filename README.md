@@ -3,12 +3,13 @@
 <!-- omit in toc -->
 ## Table of Contents
  - [Calculate Average Pixel Changes](#calculate-average-pixel-changes)
- - [Image Augmentation](#image-augmentation)
  - [Pull And Process](#pull-and-process)
+ - [Image Augmentation](#image-augmentation)
 
  
 
 ### Calculate Average Pixel Changes
+![Pixel Clipping](documentation/pixel_average_clipping.png)
 The goal of this script is to condense a 10 hour video into smaller clips that contain fish
 in them. The script works by comparing the average change in pixel values between frames, 
 and selecting and cropping out sections of video that have larger changes in pixel values. 
@@ -19,6 +20,41 @@ footprint of the videos to prepare them for other processing methods.
 
 Make sure to provide a path to the script to process the video, and run 
 `python calc_avg_pixel_change.py --help` in order to see the command line options.
+
+### Pull and Process
+![Pull and Process](documentation/pull_and_process.png)
+This script automates the processing of long-duration videos stored in a Dropbox directory
+using rclone for file management [setup instructions here](https://www.dropbox.com/scl/fi/e8a42gzt6osowto23hota/Creating-Rclone-remote.docx?rlkey=jd71dx02713p2reucco7w0ob2&dl=0). It lists the video files in each subdirectory, downloads
+those exceeding a specified duration (10 hours), processes them to extract shorter clips,
+and then deletes the local copies. Files listed in SKIP_FOLDERS are not downloaded.
+
+Usage:
+
+	1. Update Global Variables at top of file, see docstring for variable descriptions
+	2. run the script
+	3. now you have processed your videos
+	4. ???
+	5. Profit
+
+**NOTE**: The process_directory assumes the following file structure (note the 'Videos'
+folder that contains the actual videos for processing)
+ROOT_DIRECTORY/
+|___ FOLDERS/
+     |___ Videos/
+     	|___ <videos_to_process>.mp4
+		|___ ...
+|___ TO/
+     |___ Videos/
+     	|___ <videos_to_process>.mp4
+		|___ ...
+|___ LOOP/
+     |___ Videos/
+     	|___ <videos_to_process>.mp4
+		|___ ...
+|___ THROUGH/
+     |___ Videos/
+     	|___ <videos_to_process>.mp4
+		|___ ...
 
 ### Image Augmentation
 ![Image augmentation](documentation/Image_aug_flowchart.png)
