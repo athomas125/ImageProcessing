@@ -40,7 +40,7 @@ Usage:
 # Configuration (see docstring above)
 DROPBOX_REMOTE = 'CichlidPiData'
 ROOT_DIRECTORY = '/BioSci-McGrath/Apps/CichlidPiData/__ProjectData/YH_Build'
-PLOT_DIR = '/storage/home/hcoda1/0/athomas314/ondemand/CichlidBowerTracking/ImageProcessing'
+PLOT_DIR = '/storage/home/hcoda1/0/athomas314/ondemand/CichlidBowerTracking/ImageProcessing/plots/'
 CLIP_DIR = '/storage/home/hcoda1/0/athomas314/scratch/clips/'
 DOWNLOAD_FOLDER = '/storage/home/hcoda1/0/athomas314/scratch/vids/'
 VIDEO_THRESHOLD_SIZE = 30000000000  # ~10 hours in Bytes
