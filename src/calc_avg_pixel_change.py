@@ -21,10 +21,12 @@ def process_video(video_path,
                   dir='plots/',
                   prefix='YH_',
                   filename='avg_pixel_change_plot.png',
-                  clip_dir='clips/'):
+                  clip_dir='clips/',
+                  threshold_devs=1):
     start = time.time()
     os.makedirs(dir, exist_ok=True)
     # Open the video file
+    video_name = video_path.split('/')[-1].split('.')[0]
     cap = cv2.VideoCapture(video_path)
     
     # Check if the video opened successfully
@@ -99,7 +101,7 @@ def process_video(video_path,
     ## OF THE AVERAGE PIXEL CHANGE BETWEEN SECONDS OF VIDEO IN ORDER TO GET   ##
     ## CLIPS THAT INCLUDE A FISH                                              ##
     ############################################################################
-    os.makedirs('clips/'+prefix+clip_dir, exist_ok=True)
+    os.makedirs(clip_dir+prefix, exist_ok=True)
     
     # Convert current_time to frame number
     def current_time_to_frame(current_time):
@@ -108,8 +110,9 @@ def process_video(video_path,
     # Identify continuous peak locations
     continuous_segments = []
     start_idx = None
-    threshold = np.mean(pixel_changes) + np.std(pixel_changes)
+    threshold = np.mean(pixel_changes) + threshold_devs * np.std(pixel_changes)
     n_clips = 0
+    total_extracted_time = 0
     for i, change in enumerate(pixel_changes):
         if change > threshold:
             if start_idx is None:
@@ -120,11 +123,13 @@ def process_video(video_path,
                 if end_idx > start_idx + 4:
                     continuous_segments.append((start_idx, end_idx))
                     n_clips += 1
+                    total_extracted_time += times[end_idx] - times[start_idx]
                 start_idx = None
     
     # If the last segment goes to the end of the list
     if start_idx is not None:
         continuous_segments.append((start_idx, len(pixel_changes) - 1))
+        total_extracted_time += times[len(pixel_changes) - 1] - times[start_idx]
     
     # Clip the video around each continuous segment
     cap = cv2.VideoCapture(video_path)
@@ -137,7 +142,7 @@ def process_video(video_path,
         
         cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        out = cv2.VideoWriter(f'clips/{prefix}{clip_dir}{prefix}clip_{math.floor(start_time)}_{math.floor(end_time)}.mp4', fourcc, fps, 
+        out = cv2.VideoWriter(f'{clip_dir}{prefix}/{prefix}{video_name}_clip_{math.floor(start_time)}_{math.floor(end_time)}.mp4', fourcc, fps, 
                               (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))
         
         for frame_idx in range(start_frame, end_frame + 1):
@@ -150,6 +155,7 @@ def process_video(video_path,
     
     cap.release()
     print(time.time() - start)
+    print(f"Total extracted video time: {total_extracted_time / 60:.2f} minutes")
     return n_clips
 
 if __name__ == "__main__":
@@ -161,7 +167,8 @@ if __name__ == "__main__":
     parser.add_argument("-p","--prefix", type=str, default="YH_", help="Prefix for clip filenames (make sure to add trailing '_' for readability) (default: 'YH_', ex. 'YH_s1_tr1_')")
     parser.add_argument("-f","--filename", type=str, default="avg_pixel_change_plot.png", help="Filename for the plot (default: 'avg_pixel_change_plot.png')")
     parser.add_argument("-c","--clip_dir", type=str, default="clips/", help="Directory to save video clips (default: ''clips/')")
+    parser.add_argument("-t","--threshold_devs", type=float, default=1, help="number of standard deviations above the mean to set the threshold (default = 1)")
 
     args = parser.parse_args()
     
-    process_video(args.video_path, args.sample_rate, args.end_time, args.dir, args.prefix, args.filename, args.clip_dir)
+    process_video(args.video_path, args.sample_rate, args.end_time, args.dir, args.prefix, args.filename, args.clip_dir, args.threshold_devs)
