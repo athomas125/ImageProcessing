@@ -38,15 +38,15 @@ Usage:
 
 
 # Configuration (see docstring above)
-DROPBOX_REMOTE = 'CichlidPiData'
-ROOT_DIRECTORY = '/BioSci-McGrath/Apps/CichlidPiData/__ProjectData/YH_Build'
-PLOT_DIR = '/storage/home/hcoda1/0/athomas314/ondemand/CichlidBowerTracking/ImageProcessing/plots/'
-CLIP_DIR = '/storage/home/hcoda1/0/athomas314/scratch/clips/'
-DOWNLOAD_FOLDER = '/storage/home/hcoda1/0/athomas314/scratch/vids/'
-VIDEO_THRESHOLD_SIZE = 30000000000  # ~10 hours in Bytes
-JUST_FOLDERS = ['YH_s1_tr1_BowerBuilding']
-SKIP_FOLDERS = ['YH_s1_tr1_BowerBuilding', 'YH_s1_tr2_BowerBuilding',
-                'YH_s2_tr1_BowerBuilding', 'YH_s2_tr2_BowerBuilding']  # List of folders to skip
+# Fetch environment variables with default values (defaults are for Adam Thomas' pace cluster)
+DROPBOX_REMOTE = os.getenv('DROPBOX_REMOTE', 'CichlidPiData')
+ROOT_DIRECTORY = os.getenv('ROOT_DIRECTORY', '/BioSci-McGrath/Apps/CichlidPiData/__ProjectData/YH_Build')
+PLOT_DIR = os.getenv('PLOT_DIR', '/storage/home/hcoda1/0/athomas314/ondemand/CichlidBowerTracking/ImageProcessing/plots/')
+CLIP_DIR = os.getenv('CLIP_DIR', '/storage/home/hcoda1/0/athomas314/scratch/clips/')
+DOWNLOAD_FOLDER = os.getenv('DOWNLOAD_FOLDER', '/storage/home/hcoda1/0/athomas314/scratch/vids/')
+VIDEO_THRESHOLD_SIZE = int(os.getenv('VIDEO_THRESHOLD_SIZE', 30000000000))  # ~10 hours in Bytes
+JUST_FOLDERS = os.getenv('JUST_FOLDERS', 'YH_s1_tr1_BowerBuilding').split(',')
+SKIP_FOLDERS = os.getenv('SKIP_FOLDERS', 'YH_s1_tr1_BowerBuilding,YH_s1_tr2_BowerBuilding,YH_s2_tr1_BowerBuilding,YH_s2_tr2_BowerBuilding').split(',')
 
 
 def list_files(remote_path):
@@ -96,11 +96,12 @@ def process_directory(directory_path):
                 DOWNLOAD_FOLDER, os.path.basename(file_path))
             video_name = local_file_path.split('/')[-1].split('.')[0]
             skip = False
-            for clip in os.listdir(CLIP_DIR + os.path.basename(directory_path)[:10]):
-                if video_name in clip:
-                    skip = True
-                    print(f'skipping downloading {file_path}')
-                    break
+            if os.path.isdir(CLIP_DIR + os.path.basename(directory_path)[:10]):
+                for clip in os.listdir(CLIP_DIR + os.path.basename(directory_path)[:10]):
+                    if video_name in clip:
+                        skip = True
+                        print(f'skipping downloading {file_path}')
+                        break
             if skip:
                 continue
             
@@ -114,7 +115,7 @@ def process_directory(directory_path):
                               dir=PLOT_DIR,
                               prefix=os.path.basename(directory_path)[:10],
                               clip_dir=CLIP_DIR,
-                              threshold_devs=1)
+                              threshold_devs=0.75)
                 delete_file(local_file_path)
                 # if n_clips > 5:
                 #     break  # Process until you have five clips per directory
