@@ -2,11 +2,18 @@
 
 <!-- omit in toc -->
 ## Table of Contents
+ - [Cropping And Rotation](#cropping-and-rotating)
  - [Calculate Average Pixel Changes](#calculate-average-pixel-changes)
  - [Pull And Process](#pull-and-process)
  - [Image Augmentation](#image-augmentation)
 
  
+### Cropping and rotating
+The two scripts `crop_and_rotate_video.py` and `cropping_dataset.py` were created in order to
+be used with the cichlid bower tracking repository. In particular `cropping_dataset.py` is
+dependent on the folder structure that is created when labelling data in DEEPLABCUT. Click 
+[here](#how-to-get-rotation-and-cropping-angles-for-videos) for instructions on how to get
+the cropping and rotation angles for a dataset.
 
 ### Calculate Average Pixel Changes
 ![Pixel Clipping](documentation/pixel_average_clipping.png)
@@ -37,27 +44,27 @@ Usage:
 	5. Profit
 
 **NOTE**: The process_directory assumes the following file structure (note the 'Videos'
-folder that contains the actual videos for processing)
-ROOT_DIRECTORY/
-|___ FOLDERS/
-     |___ Videos/
-     	|___ <videos_to_process>.mp4
-		|___ ...
-|___ TO/
-     |___ Videos/
-     	|___ <videos_to_process>.mp4
-		|___ ...
-|___ LOOP/
-     |___ Videos/
-     	|___ <videos_to_process>.mp4
-		|___ ...
-|___ THROUGH/
-     |___ Videos/
-     	|___ <videos_to_process>.mp4
-		|___ ...
+folder that contains the actual videos for processing)\
+ROOT_DIRECTORY/\
+&nbsp;&nbsp;&nbsp;&nbsp;|___ FOLDERS/\
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|___ Videos/\
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|___ <videos_to_process>.mp4\
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|___ ...\
+&nbsp;&nbsp;&nbsp;&nbsp;|___ TO/\
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|___ Videos/\
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|___ <videos_to_process>.mp4\
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|___ ...\
+&nbsp;&nbsp;&nbsp;&nbsp;|___ LOOP/\
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|___ Videos/\
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|___ <videos_to_process>.mp4\
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|___ ...\
+&nbsp;&nbsp;&nbsp;&nbsp;|___ THROUGH/\
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|___ Videos/\
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|___ <videos_to_process>.mp4\
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;|___ ...\
 
 ### Image Augmentation
-![Image augmentation](documentation/Image_aug_flowchart.png)
+![Image augmentation](documentation/Image_aug_flowchart.png)\
 This script performs data augmentation on a dataset of images by applying random color transformations and 
 optionally converting the images to grayscale. The purpose is to enhance the dataset for training neural networks, 
 ensuring that the network does not rely on the color of the images to make predictions.
@@ -78,3 +85,20 @@ Functions:
 * convert_to_grayscale(image): Converts an image to grayscale.
 * augment_dataset(input_folder, output_folder, num_augmentations=5, include_grayscale=False): 
   * Augments the dataset with color transformations and optionally includes grayscale images.
+
+
+### How to get rotation and cropping angles for videos
+Follow these instructions to get the rotation and cropping angles that remove the tank borders in order to remove fish reflections from the deeplabcut video dataset
+1. Navigate to the folder of interest. In this example we will be using the Single_nuc_1 dataset, and in particular the MC_singlenuc29_3_Tk9_030320 trial
+2. The Videos/ folder contains the full dataset from each trial, with one image file per video.  
+![Dropbox directory](documentation/dropbox_directory.png)
+3. Download the image file
+4. Download GIMP from link [here](https://www.gimp.org/downloads/)
+5. Open in the image in gimp
+6. Click the rotate button  
+![rotate button](documentation/gimp_rotate_button.png)
+7. rotate the image until the walls of the tank are vertical, and record the rotation angle  
+![rotate image](documentation/rotated_vertical.png)
+8. Use the rectangle select tool to draw your selection area - crop out the outer walls and just include the sand area   
+![example region](documentation/example_cropping_region.png)
+9. Record the position and size of the box you drew

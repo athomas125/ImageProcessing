@@ -1,9 +1,27 @@
 import cv2
 
 def clip_to_time(video_path, start_time, end_time, output_path):
-    #start time in seconds
-    # end time in seconds
-    cap = cv2.VideoCapture(video_path)
+    """
+    Clips a segment from a video file based on the specified start and end times and saves it to a new file.
+
+    Parameters:
+    video_path (str): The path to the input video file.
+    start_time (float): The start time in seconds for the segment to clip.
+    end_time (float): The end time in seconds for the segment to clip.
+    output_path (str): The path to save the clipped video segment.
+
+    Returns:
+    str: The path to the saved clipped video file.
+
+    Example usage:
+    video_path = "/path/to/input/video.mp4"
+    start_time = 1020  # in seconds
+    end_time = 1080    # in seconds
+    output_path = "/path/to/output/clipped_video.mp4"
+
+    clip_to_time(video_path, start_time, end_time, output_path)
+    """
+    cap = cv2.VideoCapture(video_path) #(but really no cap tho)
 
     # Get the frames per second (fps) of the input video
     fps = int(cap.get(cv2.CAP_PROP_FPS))
@@ -32,11 +50,4 @@ def clip_to_time(video_path, start_time, end_time, output_path):
     # Release everything if job is finished
     cap.release()
     out.release()
-
-# # Example usage
-# video_path = "/mnt/c/Users/attho/Downloads/MC_singlenuc23_1_Tk33_0212200003_vid_clip_36170_38240.mp4"
-# start_time = 1020  # in seconds
-# end_time = 1080    # in seconds
-# output_path = '/mnt/c/Users/attho/Downloads/MC_singlenuc23_1_Tk33_0212200003_vid_debugging_clip.mp4'
-
-# clip_to_time(video_path, start_time, end_time, output_path)
+    return output_path
